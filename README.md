@@ -193,6 +193,65 @@ Para uma experiência mais intuitiva no frontend, use:
 
 Importante: o modelo COCO usado pelo YOLO não possui uma classe específica chamada `tablet`. Dependendo da imagem, um tablet pode aparecer como `cell phone`, `book`, `laptop` ou não ser detectado.
 
+## Segurança
+
+O VisionGuard API possui proteções básicas importantes para um MVP de visão computacional que recebe uploads e executa modelos de IA.
+
+Proteções implementadas:
+
+- Limite de tamanho de upload configurado por `MAX_UPLOAD_SIZE_MB`.
+- Limite de resolução e quantidade máxima de pixels da imagem.
+- Validação de extensão, aceitando apenas `.jpg`, `.jpeg` e `.png`.
+- Validação de `content-type`, aceitando apenas `image/jpeg` e `image/png`.
+- Validação do decode da imagem com OpenCV antes de executar detecção.
+- Rejeição de arquivos vazios ou inválidos.
+- Rate limiting em rotas pesadas que executam OpenCV/YOLO.
+- Retorno de `429 Too Many Requests` quando o limite de requisições é excedido.
+- Uso de UUID no nome dos arquivos anotados para evitar sobrescrita.
+- Queries parametrizadas no SQLite para reduzir risco de SQL injection.
+
+Rotas protegidas por rate limiting:
+
+- `POST /detect/faces`
+- `POST /detect/faces/annotated`
+- `POST /detect/objects`
+- `POST /detect/objects/annotated`
+- `POST /detect/all`
+- `POST /detect/all/annotated`
+- `POST /analyze/image`
+
+Configurações principais:
+
+```python
+MAX_UPLOAD_SIZE_MB = 10
+MAX_IMAGE_WIDTH = 4096
+MAX_IMAGE_HEIGHT = 4096
+MAX_IMAGE_PIXELS = 16_000_000
+RATE_LIMIT_MAX_REQUESTS = 60
+RATE_LIMIT_WINDOW_SECONDS = 60
+```
+
+Limitações atuais do MVP:
+
+- Ainda não há autenticação.
+- Ainda não há autorização por usuário.
+- O rate limiter atual é em memória, adequado para MVP/local, mas não para múltiplos servidores.
+- Ainda não há CORS restritivo configurado para produção.
+- Ainda não há limpeza automática dos arquivos antigos em `outputs/`.
+- Ainda não há logs estruturados de auditoria.
+
+Recomendações futuras para produção:
+
+- Adicionar autenticação, como API key, OAuth2 ou login com provedor externo.
+- Usar Redis, API Gateway, Nginx ou Cloudflare para rate limiting distribuído.
+- Configurar CORS restritivo para permitir apenas domínios confiáveis.
+- Adicionar logs estruturados com rota, IP, status code e tempo de resposta.
+- Criar limpeza automática para arquivos antigos em `outputs/`.
+- Definir política de retenção para imagens e histórico.
+- Executar a aplicação com HTTPS.
+
+Mais detalhes estão documentados em [`SECURITY.md`](SECURITY.md).
+
 ## Banco De Dados
 
 O projeto usa SQLite para manter a configuração simples e adequada para portfólio. O arquivo do banco é criado automaticamente em:
