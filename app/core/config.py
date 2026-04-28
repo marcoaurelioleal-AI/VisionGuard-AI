@@ -7,6 +7,7 @@ DEFAULT_FACE_SCALE_FACTOR = 1.1
 DEFAULT_FACE_MIN_NEIGHBORS = 5
 DEFAULT_FACE_MIN_SIZE = 30
 YOLO_MODEL_NAME = "yolo11n.pt"
+YOLO_IMAGE_SIZE = 1280
 MAX_UPLOAD_SIZE_MB = 10
 MAX_IMAGE_WIDTH = 4096
 MAX_IMAGE_HEIGHT = 4096
@@ -25,6 +26,7 @@ class Settings(BaseModel):
     data_dir: Path = Path("data")
     database_path: Path = Path("data/visionguard.db")
     yolo_model_name: str = YOLO_MODEL_NAME
+    yolo_image_size: int = YOLO_IMAGE_SIZE
     max_upload_size_mb: int = MAX_UPLOAD_SIZE_MB
     max_image_width: int = MAX_IMAGE_WIDTH
     max_image_height: int = MAX_IMAGE_HEIGHT

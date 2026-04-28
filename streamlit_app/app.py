@@ -162,6 +162,21 @@ CLASS_FILTERS = {
     "Eletrônicos": ["tv", "laptop", "mouse", "remote", "keyboard", "cell phone"],
 }
 
+LABEL_DISPLAY_NAMES = {
+    "person": "pessoa",
+    "cell phone": "celular/tablet",
+    "laptop": "notebook/tablet",
+    "tv": "tela/TV",
+    "book": "livro/caderno",
+    "potted plant": "planta",
+    "chair": "cadeira",
+    "dining table": "mesa",
+    "handbag": "bolsa",
+    "backpack": "mochila",
+    "bottle": "garrafa",
+    "cup": "copo",
+}
+
 OBJECT_MODE = "Detectar objetos"
 FACE_MODE = "Detectar faces"
 COMBINED_MODE = "Detectar objetos e faces"
@@ -482,7 +497,7 @@ def render_sidebar() -> tuple[Any | None, str, bool]:
                 "confidence_threshold",
                 min_value=0.0,
                 max_value=1.0,
-                value=0.4,
+                value=0.25,
                 step=0.05,
                 key="confidence_threshold",
                 help=(
@@ -490,6 +505,10 @@ def render_sidebar() -> tuple[Any | None, str, bool]:
                     "Valores maiores deixam o resultado mais rigoroso; valores menores mostram mais itens, "
                     "mas podem incluir detecções menos confiáveis."
                 ),
+            )
+            st.caption(
+                "Dica: para itens pequenos, objetos nas mãos ou telas ao fundo, "
+                "use valores entre 0.25 e 0.35."
             )
             filter_options = list(CLASS_FILTERS)
             if st.session_state.get("class_filter") not in filter_options:
@@ -729,6 +748,55 @@ def generate_local_insight(result: dict[str, Any]) -> str:
     )
 
 
+def translate_label(label: str) -> str:
+    return LABEL_DISPLAY_NAMES.get(label, label)
+
+
+def generate_specific_local_insight(result: dict[str, Any]) -> str:
+    if result.get("summary"):
+        return str(result["summary"])
+
+    total_objects = int(result.get("total_objects", 0) or 0)
+    total_faces = int(result.get("total_faces", 0) or 0)
+    labels = get_detected_object_labels(result)
+    label_counts = {
+        label: labels.count(label)
+        for label in dict.fromkeys(labels)
+    }
+    readable_labels = ", ".join(
+        f"{translate_label(label)} ({count})"
+        for label, count in list(label_counts.items())[:5]
+    )
+
+    if total_objects and total_faces:
+        base = (
+            f"A imagem possui {total_faces} face(s) e {total_objects} objeto(s) detectado(s). "
+            f"Principais achados: {readable_labels or 'sem rotulos disponiveis'}."
+        )
+        if {"cell phone", "laptop", "book"} & set(labels):
+            return (
+                f"{base} Ha indicios de itens proximos as maos, como celular/tablet, "
+                "notebook/tablet ou livro/caderno."
+            )
+        if "tv" in labels:
+            return f"{base} Tambem foi identificada uma tela/TV ao fundo."
+        return base
+
+    if total_objects:
+        return (
+            f"A imagem contem {total_objects} objeto(s) detectado(s). "
+            f"Principais achados: {readable_labels or 'objetos detectados'}."
+        )
+
+    if total_faces:
+        return f"A analise encontrou {total_faces} face(s) na imagem."
+
+    return (
+        "Nenhum objeto ou face foi detectado com os parametros atuais. "
+        "Para itens pequenos ou telas ao fundo, tente usar threshold entre 0.25 e 0.35."
+    )
+
+
 def render_metrics(result: dict[str, Any], mode: str) -> None:
     st.markdown('<div class="section-title">Métricas</div>', unsafe_allow_html=True)
 
@@ -745,7 +813,7 @@ def render_metrics(result: dict[str, Any], mode: str) -> None:
 
 def render_insight(result: dict[str, Any]) -> None:
     st.markdown('<div class="section-title">🧠 Insight da análise</div>', unsafe_allow_html=True)
-    st.info(generate_local_insight(result))
+    st.info(generate_specific_local_insight(result))
     if detects_only_people_as_objects(result):
         st.warning(
             "O YOLO está detectando pessoas como objetos. "

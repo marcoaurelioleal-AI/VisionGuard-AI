@@ -5,7 +5,7 @@ import numpy as np
 from fastapi import HTTPException, status
 from ultralytics import YOLO
 
-from app.core.config import DEFAULT_CONFIDENCE_THRESHOLD, YOLO_MODEL_NAME
+from app.core.config import DEFAULT_CONFIDENCE_THRESHOLD, YOLO_MODEL_NAME, settings
 from app.schemas.object import DetectedObject, ObjectBox
 
 
@@ -28,7 +28,11 @@ class ObjectDetectionService:
         allowed_classes: set[str] | None = None,
     ) -> list[DetectedObject]:
         try:
-            results = self.model(image, verbose=False)
+            results = self.model(
+                image,
+                imgsz=settings.yolo_image_size,
+                verbose=False,
+            )
         except Exception as exc:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

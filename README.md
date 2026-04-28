@@ -163,9 +163,12 @@ O modelo YOLO usado pelo backend pode ser configurado em `app/core/config.py`:
 
 ```python
 YOLO_MODEL_NAME = "yolo11n.pt"
+YOLO_IMAGE_SIZE = 1280
 ```
 
 Modelos menores são mais rápidos, porém tendem a ser menos precisos. Modelos maiores costumam ser mais precisos, mas exigem mais processamento e podem deixar a resposta da API mais lenta.
+
+O parâmetro `YOLO_IMAGE_SIZE` controla o tamanho usado na inferência. Valores maiores ajudam a encontrar objetos menores ou mais distantes, como telas ao fundo e itens nas mãos, mas deixam a análise mais lenta.
 
 Sugestões:
 
@@ -180,6 +183,8 @@ uvicorn app.main:app --reload --port 8001
 ```
 
 No Streamlit, o campo `Modo de precisão` mostra essas opções como orientação. Para manter o MVP simples e estável, a troca efetiva do modelo continua sendo feita pelo arquivo `config.py`.
+
+Para objetos pequenos, tablets, celulares ou telas ao fundo, use `confidence_threshold` entre `0.25` e `0.35`. Valores altos, como `0.70`, deixam a análise muito rigorosa e podem ocultar objetos relevantes.
 
 ## Observação Sobre Pessoas E Objetos
 
