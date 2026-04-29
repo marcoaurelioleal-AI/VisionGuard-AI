@@ -136,10 +136,13 @@ Fluxo da interface:
 - Clique em `Analisar imagem`.
 - Veja métricas, insight resumido, imagem original, imagem anotada quando existir e detalhes técnicos dentro de um expander.
 
-Espaço reservado para screenshots:
+Screenshots da interface:
 
-- `docs/images/streamlit-dashboard.png`
-- `docs/images/analysis-result.png`
+![Tela inicial do VisionGuard AI](docs/images/visionguard-home.png)
+
+![Detecção de objetos com imagem anotada](docs/images/visionguard-object-detection.png)
+
+![Detecção de faces com imagem anotada](docs/images/visionguard-face-detection.png)
 
 ## Experiência Do Frontend
 
@@ -269,14 +272,17 @@ Cada análise salva contém nome do arquivo, resumo, nível de atenção, contex
 
 ## Prints
 
-Adicione aqui capturas de tela depois de rodar o projeto:
+### Tela Inicial
 
-- Hero section e controles da sidebar.
-- Prévia da imagem enviada.
-- Resultado antes/depois com imagem anotada.
-- Métricas e seção de JSON técnico.
-- Insight visual com IA.
-- Histórico de análises no SQLite.
+![Tela inicial do VisionGuard AI](docs/images/visionguard-home.png)
+
+### Detecção De Objetos
+
+![Resultado de detecção de objetos](docs/images/visionguard-object-detection.png)
+
+### Detecção De Faces
+
+![Resultado de detecção de faces](docs/images/visionguard-face-detection.png)
 
 ## Endpoints
 
